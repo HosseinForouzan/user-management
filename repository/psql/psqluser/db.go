@@ -1,6 +1,6 @@
 package psqluser
 
-import "github.com/HosseinForouzan/user-management/repository/migrations/psql"
+import "github.com/HosseinForouzan/user-management/repository/psql"
 
 type DB struct {
 	conn *psql.PsqlDB
