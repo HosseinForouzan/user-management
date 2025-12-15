@@ -5,6 +5,7 @@ import (
 
 	"github.com/HosseinForouzan/user-management/repository/psql"
 	"github.com/HosseinForouzan/user-management/repository/psql/psqluser"
+	"github.com/HosseinForouzan/user-management/service/userservice"
 )
 
 func main() {
@@ -16,5 +17,15 @@ func main() {
 
 	fmt.Println(psqluser.GetUserByID(1))
 
+	userSvc := userservice.New(psqluser)
+
+	s, _ := userSvc.Register(userservice.RegisterRequest{
+		Name: "Majid",
+		PhoneNumber: "0912",
+		Email: "m@m",
+		Password: "123",
+	})
+
+	fmt.Println(s)
 
 }
