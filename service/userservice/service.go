@@ -8,6 +8,8 @@ import (
 
 type Repository interface {
 	Register(u entity.User) (entity.User, error)
+	IsEmailUnique(email string) (bool, error)
+	IsPhoneNumberUnique(phoneNumber string) (bool, error)
 }
 
 type Service struct {
@@ -29,6 +31,25 @@ type RegisterResponse struct {
 	User entity.User `json:"user"`
 }
 func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
+
+	isEmailUnique, err := s.repo.IsEmailUnique(req.Email)
+	if err != nil {
+		fmt.Errorf(err.Error())
+	}
+
+	isPhoneNumberUnique, err := s.repo.IsPhoneNumberUnique(req.PhoneNumber)
+	if err != nil {
+		fmt.Errorf(err.Error())
+	}
+
+	if !isEmailUnique {
+		return RegisterResponse{}, fmt.Errorf("email is not unique")
+	}
+
+	if !isPhoneNumberUnique {
+		return RegisterResponse{}, fmt.Errorf("phone number is not unique")
+	}
+
 	user := entity.User {
 		ID: 0,
 		Name: req.Name,
@@ -44,3 +65,4 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 
 	return RegisterResponse{createdUser}, nil
 }
+
