@@ -28,6 +28,7 @@ func (s Server) SetRoutes() {
 
   // Routes
   e.POST("/register", s.UserRegister)
+  e.POST("/login", s.UserLogin)
 
   // Start server
   if err := e.Start(":8080"); err != nil && !errors.Is(err, http.ErrServerClosed) {

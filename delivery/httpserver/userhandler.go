@@ -20,3 +20,19 @@ func (s Server) UserRegister(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, resp)
 }
+
+func (s Server) UserLogin(c echo.Context) error {
+	var req userservice.LoginRequest
+
+	if err := c.Bind(&req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	resp, err := s.UserSvc.Login(req)
+
+		if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusAccepted, resp)
+}

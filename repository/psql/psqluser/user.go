@@ -51,10 +51,23 @@ func (d *DB) IsPhoneNumberUnique(phoneNumber string) (bool, error) {
 }
 
 
-func (d *DB) GetUserByID(id uint) (entity.User, error) {
+func (d *DB) GetUserByEmail(email string) (entity.User, error) {
 	var user entity.User
 
-	err := d.conn.Conn().QueryRow(context.Background(), "SELECT * FROM users WHERE id=$1", 1).
+	err := d.conn.Conn().QueryRow(context.Background(), "SELECT * FROM users WHERE email=$1", email).
+	Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Email, &user.Password)
+	if err != nil {
+		return entity.User{}, fmt.Errorf("Query Failed. %w", err)
+	}
+
+	return user, nil
+
+}
+
+func (d *DB) GetUserByPhoneNumber(phone_number string) (entity.User, error) {
+	var user entity.User
+
+	err := d.conn.Conn().QueryRow(context.Background(), "SELECT * FROM users WHERE phone_number=$1", phone_number).
 	Scan(&user.ID, &user.Name, &user.PhoneNumber, &user.Email, &user.Password)
 	if err != nil {
 		return entity.User{}, fmt.Errorf("Query Failed. %w", err)
