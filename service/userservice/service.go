@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/HosseinForouzan/user-management/entity"
+	"github.com/HosseinForouzan/user-management/pkg/bcrypt"
 )
 
 type Repository interface {
@@ -52,12 +53,13 @@ func (s Service) Register(req RegisterRequest) (RegisterResponse, error) {
 		return RegisterResponse{}, fmt.Errorf("phone number is not unique")
 	}
 
+
 	user := entity.User {
 		ID: 0,
 		Name: req.Name,
 		PhoneNumber: req.PhoneNumber,
 		Email: req.Email,
-		Password: req.Password,
+		Password: bcrypt.HashPassword(req.Password),
 	}
 
 	createdUser, err := s.repo.Register(user)
@@ -81,14 +83,13 @@ type LoginResponse struct {
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
-
 	if req.Email != ""{
 		userByEmail, err := s.repo.GetUserByEmail(req.Email)
 		if err != nil {
 			return LoginResponse{}, fmt.Errorf(err.Error())
 			}
 
-		if req.Password != userByEmail.Password {
+		if !bcrypt.CheckPasswordHash(req.Password, userByEmail.Password) {
 				return LoginResponse{}, fmt.Errorf("your credential is not correct")
 	}
 }
@@ -99,7 +100,7 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 			return LoginResponse{}, fmt.Errorf(err.Error())
 		}
 
-		if req.Password != userByPhoneNumber.Password {
+		if !bcrypt.CheckPasswordHash(req.Password, userByPhoneNumber.Password) {
 			return LoginResponse{}, fmt.Errorf("your credential is not correct")
 		}
 	}
