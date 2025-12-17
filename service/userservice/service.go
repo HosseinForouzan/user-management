@@ -2,6 +2,9 @@ package userservice
 
 import (
 	"fmt"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
 
 	"github.com/HosseinForouzan/user-management/entity"
 	"github.com/HosseinForouzan/user-management/pkg/bcrypt"
@@ -80,6 +83,7 @@ type LoginRequest struct {
 type LoginResponse struct {
 	Email string 	`json:"email"`
 	PhoneNumber string `json:"phone_number"`
+	Token string `json:"token"`
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
@@ -104,8 +108,46 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 			return LoginResponse{}, fmt.Errorf("your credential is not correct")
 		}
 	}
+
+	token, err := CreateToken(req.Email)
+	if err != nil {
+		return LoginResponse{}, fmt.Errorf("token is not valid %w", err)
+	}
 	
 
 
-	return LoginResponse{Email: req.Email, PhoneNumber: req.PhoneNumber}, nil
+	return LoginResponse{Email: req.Email, PhoneNumber: req.PhoneNumber, Token: token}, nil
 }
+
+var secretKey = []byte("secret-key")
+
+func CreateToken(email string) (string, error) {
+    token := jwt.NewWithClaims(jwt.SigningMethodHS256, 
+        jwt.MapClaims{ 
+        "email": email, 
+        "exp": time.Now().Add(time.Hour * 24).Unix(), 
+        })
+
+    tokenString, err := token.SignedString(secretKey)
+    if err != nil {
+    return "", err
+    }
+
+ return tokenString, nil
+}
+
+// func VerifyToken(tokenString string) error {
+//    token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+//       return secretKey, nil
+//    })
+  
+//    if err != nil {
+//       return err
+//    }
+  
+//    if !token.Valid {
+//       return fmt.Errorf("invalid token")
+//    }
+  
+//    return nil
+// }
